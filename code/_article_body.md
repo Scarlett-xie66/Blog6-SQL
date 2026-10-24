@@ -22,8 +22,15 @@ format:
     code-copy: true
     embed-resources: true
     body-classes: blog6-report
+jupyter: python3
 execute:
-  enabled: false
+  daemon: false
+  enabled: true
+  echo: false
+  warning: false
+  error: false
+  cache: false
+  freeze: false
 ---
 
 @@STYLE@@
@@ -31,6 +38,8 @@ execute:
 Income measurement changes the mobility story. Averaging both generations’ incomes gives an IGE of **0.302 in early adulthood and 0.489 in midlife** ([models B and D](#table-1)); separating the measures shows which generation drives the change.
 
 <span class="research-question">**How do we build a reliable parent–child family income table in SQL, and what changes when we measure income at different ages and over several years?**</span>
+
+Measuring children too early can make economic mobility look greater if their incomes have yet to reflect their longer-run prospects. The practical challenge is to separate changes in income measurement from changes in who enters the sample.
 
 SQL links seven official PSID files into one row per child. Python estimates **intergenerational income elasticity (IGE)**: the percentage difference in child family income associated with a 1% difference in father family income.[^ige]
 
@@ -371,7 +380,7 @@ print(comparison.round(3))
 
 **Averaging the child’s family income lowers early IGE but barely changes midlife IGE.** Across the two fixed father measures, early estimates fall **0.285 → 0.194** and **0.407 → 0.302**; midlife estimates change **0.311 → 0.315** and **0.508 → 0.489**.
 
-Child averaging therefore offsets much of father averaging’s early-career increase. This fits the distinction between noise in a regressor, which can attenuate a slope, and independent outcome noise, which mainly affects precision; it does not establish a lifetime-income estimate.[^measurement]
+Child averaging therefore offsets much of father averaging’s early-career increase. A temporary windfall or setback in the father’s measured income can blur the relationship with longer-run resources, pulling the estimated slope toward zero under standard measurement-error assumptions. Averaging can reduce that distortion. Independent temporary variation in the child’s income instead makes the relationship harder to estimate precisely; it need not lower the slope. The different effects here show why averaging both sides is not one uniform correction.[^measurement]
 
 ### 2. Family income fluctuates less in midlife
 
@@ -436,13 +445,15 @@ Leaving out each father and his children preserves the averaged estimates’ ord
 
 </details>
 
-The pattern fits lifecycle concerns, but period changes and family composition also matter; age alone is not identified.[^lifecycle]
+**Why age matters.** Early-career income may understate longer-run resources for people whose incomes rise more steeply. If that growth is related to parental resources, observing children young can understate intergenerational persistence. Averaging nearby early years can smooth temporary shocks without correcting this age-related mismatch.[^lifecycle]
+
+The sample illustrates the concern: averaged IGE is higher in midlife (Figure 1), while relative family income is steadier (Figure 3). These are complementary checks, not a measurement of true lifetime-income bias. The age contrast remains statistically uncertain, neither window observes lifetime resources, and age changes alongside the calendar period and family composition.
 
 ## Takeaway
 
 SQL turns seven official PSID files into an auditable table of **187 children and 163 fathers**. On this fixed sample, averaging fathers’ family income raises IGE; averaging children’s family income lowers early IGE by about 0.10 but barely changes midlife estimates ([Table 4](#table-4)). Relative family income also fluctuates less in midlife for **69% of children** (Figure 3).
 
-**Income measurement changes the mobility story.** The averaged IGE rises from 0.302 to 0.489, but its age-window difference remains statistically uncertain ([Table 3](#table-3)). Longer histories and broader cohorts would help distinguish lifecycle patterns from period and family changes.
+**Income measurement changes the mobility story.** Averaging smooths short-run fluctuations; measuring at a suitable life stage addresses a different problem. The averaged IGE rises from 0.302 to 0.489, but the age-window difference remains statistically uncertain ([Table 3](#table-3)). Longer histories and broader cohorts would help separate lifecycle patterns from period and family changes.
 
 ## Reproducibility
 
@@ -467,7 +478,7 @@ result/
 └── figures/           # three 300-dpi PNGs
 ```
 
-To rebuild, install `requirements.txt` and run `python code/run_all.py`. For fresh extraction, place the seven ZIPs in `data/raw/` and first run `python code/01_extract_official.py`. Copy the whole post folder to `blog/posts/post6/` before rendering the website. The [README](README.md) contains the full inventory and commands.
+Install `requirements.txt`, then render `index.qmd`. Each render reruns the Python and SQL analysis, saves results and figures in `result/`, and displays the freshly generated article. Keep the whole post folder together; the [README](README.md) contains the source-data and environment instructions.
 
 [^ige]: A higher IGE means a closer link between generations’ incomes—and less relative mobility by this measure. “Income” here covers the whole family, including a partner’s income, rather than just one person’s pay.
 

@@ -1,13 +1,19 @@
 """Insert executed SQL previews and calculated results into the editable article."""
 from pathlib import Path
-import base64,html,json,sqlite3
+import argparse,base64,html,json,re,sqlite3
 import pandas as pd
 ROOT=Path(__file__).resolve().parents[1]
-c=sqlite3.connect(':memory:');c.deserialize((ROOT/'data/processed/analysis.sqlite').read_bytes())
+parser=argparse.ArgumentParser()
+parser.add_argument('--body-only',action='store_true')
+args=parser.parse_args()
+database = ROOT / 'data/processed/analysis.sqlite'
+if not database.is_file():
+    raise FileNotFoundError(f'Analysis database not found: {database}')
+c = sqlite3.connect(str(database))
 def table(df):
     return '<div class="table-scroll">\n'+df.to_html(index=False,border=0,classes='data-table',float_format=lambda x:f'{x:,.3f}')+'\n</div>'
 def query(sql):return table(pd.read_sql_query(sql,c))
-sql=(ROOT/'sql/02_match.sql').read_text()
+sql=(ROOT/'sql/02_match.sql').read_text(encoding='utf-8')
 def statement(name):
     start=sql.index('CREATE TABLE '+name+' AS')
     end=sql.index(';',start)+1
@@ -67,7 +73,7 @@ tokens['AGE_CONTRAST_TABLE']=table(pd.DataFrame({
     'Income measure':['Single year (C − A)','Both averaged (D − B)'],
     'Midlife minus early IGE':contrasts.difference.map(lambda v:f'{v:.3f}'),
     '95% paired interval':[f'[{r.ci_low:.3f}, {r.ci_high:.3f}]' for _,r in contrasts.iterrows()]}))
-stats=json.loads((ROOT/'result/further_analysis.json').read_text())
+stats=json.loads((ROOT/'result/further_analysis.json').read_text(encoding='utf-8'))
 vol=pd.read_csv(ROOT/'result/person_volatility.csv')
 wide=vol[vol.group.ne('Fathers')].pivot(index='person_id',columns='group',values='within_log_sd')
 lower=int((wide['Children, midlife']<wide['Children, early']).sum())
@@ -87,13 +93,21 @@ tokens['INFLUENCE_TABLE']=table(pd.DataFrame({
     'Both-generation averages':['Early career (B)','Midlife (D)'],
     'Lowest leave-one-father IGE':influence.leave_one_father_min.map(lambda v:f'{v:.3f}'),
     'Highest leave-one-father IGE':influence.leave_one_father_max.map(lambda v:f'{v:.3f}')}))
-tokens['STYLE']=(ROOT/'code/article_style.html').read_text()
+tokens['STYLE']=(ROOT/'code/article_style.html').read_text(encoding='utf-8')
 for key,name in [('FIGURE1_DATA','figure1_ige_windows.png'),
                  ('FIGURE2_DATA','figure2_averaging_decomposition.png'),
                  ('FIGURE3_DATA','figure3_income_dispersion.png')]:
     tokens[key]='data:image/png;base64,'+base64.b64encode((ROOT/'result/figures'/name).read_bytes()).decode('ascii')
-body=(ROOT/'code/_article_body.md').read_text()
+body=(ROOT/'code/_article_body.md').read_text(encoding='utf-8')
 for k,v in tokens.items():body=body.replace('@@'+k+'@@',v)
 assert '@@' not in body
-(ROOT/'index.qmd').write_text(body)
-print('Generated index.qmd from executed previews and the editable article template.')
+match=re.fullmatch(r'---\n(.*?)\n---\n(.*)',body,re.S)
+assert match,'Article template must have one YAML header'
+header,content=match.groups()
+(ROOT/'result/_article_rendered.md').write_text(content,encoding='utf-8')
+preview_header=header.replace('  enabled: true','  enabled: false')
+(ROOT/'result/_preview.qmd').write_text('---\n'+preview_header+'\n---\n'+content,encoding='utf-8')
+if not args.body_only:
+    entry=(ROOT/'code/_quarto_entry.py').read_text(encoding='utf-8')
+    (ROOT/'index.qmd').write_text('---\n'+header+'\n---\n\n```{python}\n'+entry.rstrip()+'\n```\n',encoding='utf-8')
+print('Generated article outputs'+(' without changing index.qmd.' if args.body_only else ' and executable index.qmd.'))

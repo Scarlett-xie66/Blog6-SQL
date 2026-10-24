@@ -36,6 +36,8 @@ for name,sql in queries.items():
 for t in ['persons','roster','family_income','income_summary']:
  pd.read_sql_query('SELECT * FROM '+t,c).to_csv(ROOT/f'data/processed/{t}.csv',index=False)
 assert c.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
-(ROOT/'data/processed/analysis.sqlite').write_bytes(c.serialize())
+# SQLite backup also works with Python versions without the newer serialization API.
+with sqlite3.connect(str(ROOT/'data/processed/analysis.sqlite')) as destination:
+ c.backup(destination)
 print('Final sample:',c.execute('SELECT COUNT(*),COUNT(DISTINCT father_id),SUM(child_sex=2),SUM(n_topcoded>0) FROM matched_income').fetchone(),flush=True)
 c.close()

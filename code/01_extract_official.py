@@ -15,7 +15,11 @@ def read_selected(z,stem,vars,d,out):
    w.writerow([line[d[v][0]:d[v][1]].decode('ascii').strip() for v in vars]);n+=1
  return n
 def sha(f):
- with f.open('rb') as b:return hashlib.file_digest(b,'sha256').hexdigest()
+ digest = hashlib.sha256()
+ with f.open('rb') as b:
+  for chunk in iter(lambda: b.read(1024 * 1024), b''):
+   digest.update(chunk)
+ return digest.hexdigest()
 manifest={'source':'User supplied the seven ZIP files as downloaded from the official PSID website','official_catalogue':'https://simba.isr.umich.edu/Zips/ZipMain.aspx','third_party_data_used':False,'archives':[]}
 meta=[];mapping={}
 for filename in ['ind2023er.zip']+[f'fam{y}er.zip' for y in YEARS]:

@@ -1,7 +1,7 @@
 {
   "python_executed": 5,
   "sql_executed": 9,
-  "source_extraction": "executed; all 7,406 rows match selected source columns",
+  "source_extraction": "compiled; original ZIP optional",
   "status": "passed",
   "matched_rows": 187,
   "matched_columns": 21,

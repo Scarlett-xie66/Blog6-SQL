@@ -31,7 +31,7 @@
   "pilot_estimates": [
     {
       "specification": "Early career, single year",
-      "beta": 0.28456746597296007,
+      "beta": 0.28456746597295995,
       "ci_low": 0.11273894148683525,
       "ci_high": 0.4792414267232593,
       "children": 187,
@@ -40,7 +40,7 @@
     },
     {
       "specification": "Early career, 3-observation mean logs",
-      "beta": 0.3017166613421679,
+      "beta": 0.301716661342168,
       "ci_low": 0.15641803525619336,
       "ci_high": 0.46122539186984285,
       "children": 187,
@@ -49,16 +49,16 @@
     },
     {
       "specification": "Midlife, single year",
-      "beta": 0.3105511056485102,
+      "beta": 0.31055110564851124,
       "ci_low": 0.143459748745777,
       "ci_high": 0.5193926413771454,
       "children": 187,
       "fathers": 163,
-      "associated_pct_for_10pct_higher_father_income": 3.004107667958711
+      "associated_pct_for_10pct_higher_father_income": 3.004107667958733
     },
     {
       "specification": "Midlife, 3-observation mean logs",
-      "beta": 0.4889354007474451,
+      "beta": 0.4889354007474449,
       "ci_low": 0.28797749273578754,
       "ci_high": 0.7164124393204185,
       "children": 187,

@@ -34,8 +34,8 @@ class Inspect(HTMLParser):
     self.visible_tutorial_python+=1
  def handle_endtag(self,tag):
   if tag=='details':self.details.pop()
-h=(ROOT/'index.html').read_text();p=Inspect();p.feed(h)
-qmd=(ROOT/'index.qmd').read_text()
+h=(ROOT/'index.html').read_text(encoding='utf-8');p=Inspect();p.feed(h)
+qmd=(ROOT/'result/_article_rendered.md').read_text(encoding='utf-8')
 source_images=re.findall(r'<img\b[^>]*src="([^"]+)"',qmd)
 assert len(source_images)==3 and all(v.startswith('data:image/png;base64,') for v in source_images)
 for src,name in zip(source_images,['figure1_ige_windows.png','figure2_averaging_decomposition.png','figure3_income_dispersion.png']):
@@ -62,7 +62,7 @@ for forbidden in ['Morningstar','0.492','649 children','661 children','simulatio
 report=dict(status='passed',embedded_figures=len(p.images),tables=p.tables,math_elements=p.math,
             footnotes=9,local_links_exist=True,fragment_links_resolve=True,
             responsive_css=True,closed_analysis_code_panels=p.folds,part1_code_visible=True,
-            six_result_tables_linked=True,closed_supporting_tables=p.supporting,qmd_images_embedded=True,
+            six_result_tables_linked=True,closed_supporting_tables=p.supporting,generated_article_images_embedded=True,
             takeaway_is_single_conclusion=True,
             visual_chart_inspection='completed',browser_layout='not verified')
 (ROOT/'result/html_validation.json').write_text(json.dumps(report,indent=2)+'\n')

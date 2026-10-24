@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 ROOT=Path(__file__).resolve().parents[1]
 ap=argparse.ArgumentParser();ap.add_argument('--archives-dir',type=Path);args=ap.parse_args()
-qmd=(ROOT/'index.qmd').read_text()
+qmd=(ROOT/'result/_article_rendered.md').read_text(encoding='utf-8')
 blocks=re.findall(r'^```(python|sql)\n(.*?)^```',qmd,re.M|re.S)
 env={};counts={'python_executed':0,'sql_executed':0,'source_extraction':'compiled; original ZIP optional'}
 os.chdir(ROOT)
@@ -38,7 +38,7 @@ with contextlib.redirect_stdout(io.StringIO()):
  for _,r in actual.iterrows():
   v=target[(target.stage==r.stage)&(target.father_measure==r.father_measure)&(target.child_measure==r.child_measure)].beta.iloc[0]
   np.testing.assert_allclose(r.IGE,v,rtol=1e-12)
- stats=json.loads((ROOT/'result/further_analysis.json').read_text());sd=env['paired_sd']
+ stats=json.loads((ROOT/'result/further_analysis.json').read_text(encoding='utf-8'));sd=env['paired_sd']
  np.testing.assert_allclose(sd['Early career'].median(),stats['median_early'],rtol=1e-12)
  np.testing.assert_allclose(sd.Midlife.median(),stats['median_midlife'],rtol=1e-12)
  np.testing.assert_allclose((sd.Midlife<sd['Early career']).mean(),stats['fraction_with_lower_midlife_dispersion'])
