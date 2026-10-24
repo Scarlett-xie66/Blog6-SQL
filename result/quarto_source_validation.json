@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "normal_render_targets": [
+    "index.qmd"
+  ],
+  "external_header_dependency": false,
+  "fenced_divs": false,
+  "pandoc_parser": "passed with --fail-if-warnings",
+  "native_quarto": "not available; not executed"
+}
